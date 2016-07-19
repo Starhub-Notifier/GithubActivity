@@ -1,0 +1,196 @@
+<center><font size="7">GitHUB Activity Logger</font><br>
+  <button id="login" class="btn btn-primary">Login With Github</button>
+
+<button id="logout" class="btn btn-primary" onclick=logout()>Logout</button>
+
+</center>
+</hr>
+
+
+
+<style>
+label, textarea, a { display: block; }
+hr { margin: 20px 0; }
+input { width: 300px; }
+</style>
+
+
+
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="angular.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+
+  <script>
+  console.log(window.localStorage.getItem('token'));
+  if(window.localStorage.getItem('token')!=null)
+  {
+    $("#login").hide();
+
+  }
+  else {
+    $("#logout").hide();
+  }
+
+  $("#logout").click(function(){
+    window.localStorage.removeItem('token');
+    window.location.href='index.html';
+  });
+
+  </script>
+
+
+<script>
+  $( function() {
+    $( "#accordion" ).accordion();
+  } );
+  </script>
+<div id="box" ng-app="App" ng-controller="Controller">
+
+<div style="padding:20px; margin:20px;">
+
+  <div class="card" ng-repeat="x in activity" style=" padding:20px: margin:20px;">
+  <h3 class="card-title headers" style="color:blue;padding:20px: margin:20px;">{{x.type}}</h3>
+    <div>
+      <p class="card-text" style="padding:20px: margin:20px;">
+      Repo Name: {{x.repo.name}}
+      </p>
+
+      <p class="card-text" style="padding:20px: margin:20px;">
+      Url: {{x.repo.url}}
+      </p>
+
+
+      <p class="card-text" style="padding:20px: margin:20px;">
+      done by: {{x.actor.login}} on {{x.created_at}}
+      </p>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+
+
+var mainApp = angular.module("App", []);
+
+        mainApp.controller('Controller', function($scope,$http) {
+          $scope.page=1;
+          $scope.activity={};
+          $scope.activities=function(){
+
+             try {
+               var token=window.localStorage.getItem('token');
+               $http({
+                url: 'http://localhost:3000/activity?page='+$scope.page,
+                method: 'GET',
+                headers: {
+                  'token' : token,
+                },
+              })
+              .then(function(response) {
+                  if (response) {
+                    $scope.activity=response.data;
+                    console.log($scope.activity);
+                      // success
+                  } else {
+                      // failed
+                  }
+              });
+             }
+             catch(e) {
+
+             }
+           };
+
+          $scope.next=function()
+            {console.log('next');
+              $scope.page+=1;
+              try {
+                var token=window.localStorage.getItem('token');
+                $http({
+                 url: 'http://localhost:3000/activity?page='+$scope.page,
+                 method: 'GET',
+                 headers: {
+                   'token' : token,
+                 },
+               })
+               .then(function(response) {
+                   if (response) {
+                     $scope.activity=$scope.activity.concat(response.data);
+                     console.log($scope.activity);
+                       // success
+                   } else {
+                       // failed
+                   }
+               });
+              }
+              catch(e) {
+
+              }
+
+              }
+
+              window.onscroll = function(ev) {
+               if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                   $scope.next();
+               }
+             };
+
+
+          function getParameterByName(name, url) {
+              if (!url) url = window.location.href;
+              name = name.replace(/[\[\]]/g, "\\$&");
+              var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                  results = regex.exec(url);
+              if (!results) return null;
+              if (!results[2]) return '';
+              return decodeURIComponent(results[2].replace(/\+/g, " "));
+          }
+
+          $('#login').click(function () {
+          	window.location.href='https://github.com' +
+          		'/login/oauth/authorize' +
+          		'?client_id=81e6dc85d40f05e4c2f7';
+          });
+
+          // Step 4
+          if(window.localStorage.getItem('token')!=null)
+          {
+            $scope.activities();
+          }
+          else{
+            if(getParameterByName('code'))
+            {
+            	console.log(getParameterByName('code'));
+              $.get('http://localhost:3000/getToken?code=' + getParameterByName('code'), function (access_token,err) {
+                if(err)
+                {
+                  window.localStorage.setItem('token',access_token);
+                  $("#login").hide();
+                  $("#logout").show();
+                  $scope.activities();
+                }
+                else {
+                  alert('error');
+                }
+
+            	});
+            }
+        }
+
+   });
+
+
+
+</script>
