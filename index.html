@@ -92,7 +92,7 @@ var mainApp = angular.module("App", []);
              try {
                var token=window.localStorage.getItem('token');
                $http({
-                url: 'http://localhost:3000/activity?page='+$scope.page,
+                url: 'http://54.191.251.207:3000/activity?page='+$scope.page,
                 method: 'GET',
                 headers: {
                   'token' : token,
@@ -119,7 +119,7 @@ var mainApp = angular.module("App", []);
               try {
                 var token=window.localStorage.getItem('token');
                 $http({
-                 url: 'http://localhost:3000/activity?page='+$scope.page,
+                 url: 'http://54.191.251.207:3000/activity?page='+$scope.page,
                  method: 'GET',
                  headers: {
                    'token' : token,
@@ -173,7 +173,7 @@ var mainApp = angular.module("App", []);
             if(getParameterByName('code'))
             {
             	console.log(getParameterByName('code'));
-              $.get('http://localhost:3000/getToken?code=' + getParameterByName('code'), function (access_token,err) {
+              $.get('http://54.191.251.207:3000/getToken?code=' + getParameterByName('code'), function (access_token,err) {
                 if(err)
                 {
                   window.localStorage.setItem('token',access_token);
